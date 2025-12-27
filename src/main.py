@@ -82,3 +82,12 @@ if __name__ == "__main__":
         trigger = VoicemailTrigger(str(audio_file))
         for event in trigger.run():
             print(event)
+
+# uncomment below to process a specific file only
+# if __name__ == "__main__":
+#     DATA_DIR = Path("data")
+#     specific_file = DATA_DIR / "vm6_output.wav"
+#     print(f"Processing specific file: {specific_file.name}")
+#     trigger = VoicemailTrigger(str(specific_file))
+#     for event in trigger.run():
+#         print(event)
