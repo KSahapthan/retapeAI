@@ -51,7 +51,7 @@ def detect_beep(audio_stream: Generator[bytes, None, None], stop_event=None):
         else:
             energy_ratio = 0
 
-        print(f"Time {current_time_ms}ms: Ratio = {energy_ratio:.3f}, Energy = {total_energy:.4f}")
+        # print(f"Time {current_time_ms}ms: Ratio = {energy_ratio:.3f}, Energy = {total_energy:.4f}")
         is_beep_present = energy_ratio > RATIO_THRESHOLD
 
         if state == "LISTENING":

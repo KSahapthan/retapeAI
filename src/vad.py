@@ -33,7 +33,7 @@ def detect_greeting_end(audio_stream: Generator[bytes, None, None], stop_event=N
 
         samples = np.frombuffer(chunk, dtype=np.int16) / 32768.0
         energy = rms_energy(samples)
-        print(f"Time {current_time_ms}ms: RMS energy = {energy}")
+        # print(f"Time {current_time_ms}ms: RMS energy = {energy}")
 
         # VAD state machine
         if energy > ENERGY_THRESHOLD:
@@ -46,7 +46,6 @@ def detect_greeting_end(audio_stream: Generator[bytes, None, None], stop_event=N
                 silence_frames += 1
                 speech_frames = 0
                 if silence_frames >= SILENCE_FRAMES_REQD:
-                    print(f"Greeting end detected at {current_time_ms}ms")
                     yield {
                         "timestamp_ms": current_time_ms,
                         "mode": "vad",
