@@ -73,7 +73,12 @@ class VoicemailTrigger:
             vad_thread.join()
 
 if __name__ == "__main__":
-    audio_path = "data/vm6_output.wav"
-    trigger = VoicemailTrigger(audio_path)
-    for event in trigger.run():
-        print(event)
+    # Path to the data folder
+    DATA_DIR = Path("data")
+
+    # Iterate over all .wav files in the data folder
+    for audio_file in DATA_DIR.glob("*.wav"):
+        print(f"Processing file: {audio_file.name}")
+        trigger = VoicemailTrigger(str(audio_file))
+        for event in trigger.run():
+            print(event)
