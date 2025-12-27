@@ -75,7 +75,7 @@ class VoicemailTrigger:
 
 
 if __name__ == "__main__":
-    audio_path = "data/vm6_output.wav"
+    audio_path = "data/vm2_output.wav"
 
     trigger = VoicemailTrigger(audio_path)
 

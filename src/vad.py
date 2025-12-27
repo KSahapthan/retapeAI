@@ -40,14 +40,14 @@ def detect_greeting_end(audio_stream: Generator[bytes, None, None], stop_event=N
                 silence_frames += 1
                 speech_frames = 0
                 if silence_frames >= SILENCE_FRAMES_REQD:
-                    print(f"Greeting end detected at {current_time_ms}ms")
-                    yield {
-                        "timestamp_ms": current_time_ms - MIN_SILENCE_MS,
-                        "mode": "vad",
-                        "status": "sent"
-                    }
-                    if stop_event: 
-                        stop_event.set()
+                    # print(f"Greeting end detected at {current_time_ms}ms")
+                    # yield {
+                    #     "timestamp_ms": current_time_ms - MIN_SILENCE_MS,
+                    #     "mode": "vad",
+                    #     "status": "sent"
+                    # }
+                    # if stop_event: 
+                    #     stop_event.set()
                     return
             else:
                 speech_frames = 0
