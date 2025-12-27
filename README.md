@@ -120,3 +120,17 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 ## Contact
 
 For questions or feedback, please contact [your-email@example.com].
+
+---
+
+## Results
+
+| Audio Sample Number | Approx Manual Timestamp (ms) | Type      | Predicted Timestamp (ms) | Predicted via the Type |
+|---------------------|-----------------------------|-----------|--------------------------|------------------------|
+| 1                   | 1000                        | Beep      | --                       | VAD                    |
+| 2                   | 9000                        | Beep      | --                       | VAD                    |
+| 3                   | 15000                       | Beep      | --                       | VAD+beep               |
+| 4                   | 5000                        | No Beep   | --                       | VAD                    |
+| 5                   | 15000                       | No Beep   | --                       | VAD                    |
+| 6                   | 5000                        | No Beep   | --                       | VAD                    |
+| 7                   | 12000                       | Beep      | --                       | beep                   |
