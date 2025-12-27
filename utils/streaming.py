@@ -61,3 +61,5 @@ def stream_wav(
                 # simulate real-time streaming
                 time.sleep(chunk_ms / 1000)
 
+# Do NOT flush leftover buffer
+# Intentionally drop last partial frame to keep chunk sizes uniform
