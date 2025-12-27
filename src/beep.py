@@ -10,18 +10,22 @@ sys.path.append(str(BASE_DIR))
 
 from utils.calculate_goertzel import calculate_goertzel
 
-CHUNK_MS = 20        # Each chunk is 20ms
-TARGET_FREQ = 1000   # 1000Hz beep
-THRESHOLD = 0.5      # Adjust based on files
-CONSECUTIVE_REQD = 10 # 5 consecutive chunks (~100ms) for beep start
-BUFFER_MS = 200      # Safety buffer after beep end
+CHUNK_MS = 20        
+TARGET_FREQ = 1000  
+THRESHOLD = 0.5      
+# 10 consecutive chunks (~200ms) for beep start
+CONSECUTIVE_REQD = 10 
+# Safety buffer after beep end
+BUFFER_MS = 200     
+# 4 consecutive chunks (~80ms) below threshold to confirm beep end
+BEEP_END_CONSECUTIVE = 4 
 
-def detect_beep(audio_stream: Generator[bytes, None, None],stop_event=None):
+def detect_beep(audio_stream: Generator[bytes, None, None], stop_event=None):
     """
     Detects beep start and end in a real-time audio stream.
     Yields a dictionary with:
         {
-            "timestamp_ms": int,   # time to trigger voicemail
+            "timestamp_ms": int,   
             "mode": "beep",
             "status": "sent"
         }
@@ -36,12 +40,15 @@ def detect_beep(audio_stream: Generator[bytes, None, None],stop_event=None):
     current_time_ms = 0
 
     for chunk in audio_stream:
+        # check for stop event
         if stop_event and stop_event.is_set():
             return
         
         samples = np.frombuffer(chunk, dtype=np.int16)
-        # normalize to -1.0 to 1.0
+        # normalize to -1.0 to 1.0 using linear amplitude normalization
         samples = samples / 32768.0  
+
+        # calculate Goertzel power at target frequency
         power = calculate_goertzel(samples, TARGET_FREQ)
         print(f"Time {current_time_ms}ms: Goertzel power = {power}")
 
@@ -52,6 +59,7 @@ def detect_beep(audio_stream: Generator[bytes, None, None],stop_event=None):
                 if beep_counter >= CONSECUTIVE_REQD:
                     state = "BEEPING"
                     beep_counter = 0
+                    miss_counter = 0
             else:
                 beep_counter = 0
 
@@ -59,16 +67,20 @@ def detect_beep(audio_stream: Generator[bytes, None, None],stop_event=None):
         elif state == "BEEPING":
             if power < THRESHOLD:
                 miss_counter += 1
-                if miss_counter >= 3:  # ~60ms silence to mark end
+                if miss_counter >= BEEP_END_CONSECUTIVE:  
                     trigger_time = current_time_ms + BUFFER_MS
                     print(f"Beep end detected at {current_time_ms}ms, trigger at {trigger_time}ms") 
+
                     yield {
                         "timestamp_ms": trigger_time,
                         "mode": "beep",
                         "status": "sent"
                     }
+
+                    # propagate the stop event to halt other detectors
                     if stop_event: 
                         stop_event.set()
+
                     return
             else:
                 miss_counter = 0
