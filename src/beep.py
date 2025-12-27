@@ -40,14 +40,11 @@ def detect_beep(audio_stream: Generator[bytes, None, None], stop_event=None):
         
         samples = np.frombuffer(chunk, dtype=np.int16).astype(np.float32)
         samples /= 32768.0  
-
         # calculate total Energy in the chunk
         total_energy = np.sum(samples**2) / len(samples)
-
         # calculate Goertzel Power
         powers = [calculate_goertzel(samples, freq) for freq in BEEP_FREQS]
         max_target_power = max(powers)
-
         # calculate ratio
         if total_energy > ENERGY_FLOOR:
             energy_ratio = max_target_power / total_energy
@@ -55,7 +52,6 @@ def detect_beep(audio_stream: Generator[bytes, None, None], stop_event=None):
             energy_ratio = 0
 
         print(f"Time {current_time_ms}ms: Ratio = {energy_ratio:.3f}, Energy = {total_energy:.4f}")
-
         is_beep_present = energy_ratio > RATIO_THRESHOLD
 
         if state == "LISTENING":
@@ -85,3 +81,12 @@ def detect_beep(audio_stream: Generator[bytes, None, None], stop_event=None):
 
         # increment time stamp
         current_time_ms += CHUNK_MS
+    
+    # this runs only if loop finishes without detecting beep
+    if stop_event and stop_event.is_set():
+        return
+    yield {
+        "timestamp_ms": current_time_ms,
+        "mode": None,
+        "status": "sent"
+    }

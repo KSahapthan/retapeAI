@@ -16,7 +16,7 @@ class VoicemailTrigger:
     Tiered system:
     Tier 1 — VAD greeting-end detection
     Tier 2 — Beep detection (highest confidence)
-    Tier 3 — Timeout (TODO)
+    Tier 3 — Timeout/Fall-back
     """
 
     def __init__(self, audio_path: str):
@@ -49,15 +49,14 @@ class VoicemailTrigger:
         """
         Run beep and VAD detection in parallel. Yield the first event detected.
         """
-        # Start threads for beep and VAD detection
+        # start threads for beep and VAD detection
         beep_thread = Thread(target=self._run_beep_detection)
         vad_thread = Thread(target=self._run_vad_detection)
-
         beep_thread.start()
         vad_thread.start()
 
         try:
-            # Wait for the first event or timeout
+            # wait for the first event or timeout
             event = self.event_queue.get(timeout=self.max_time_ms / 1000)
             yield event
         except Empty:
@@ -68,16 +67,13 @@ class VoicemailTrigger:
                 "status": "sent"
             }
         finally:
-            # Signal threads to stop and wait for them to finish
+            # signal threads to stop and wait for them to finish
             self.stop_event.set()
             beep_thread.join()
             vad_thread.join()
 
-
 if __name__ == "__main__":
-    audio_path = "data/vm2_output.wav"
-
+    audio_path = "data/vm6_output.wav"
     trigger = VoicemailTrigger(audio_path)
-
     for event in trigger.run():
         print(event)
