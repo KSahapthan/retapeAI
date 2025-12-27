@@ -10,7 +10,7 @@ from utils.streaming import stream_wav
 
 # path to the audio file
 DATA_DIR = BASE_DIR / "data"
-audio_path = DATA_DIR / "vm7_output.wav"
+audio_path = DATA_DIR / "vm4_output.wav"
 
 # stream audio and print chunk lengths
 for chunk in stream_wav(str(audio_path)):
