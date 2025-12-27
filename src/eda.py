@@ -1,6 +1,7 @@
 # eda.py
 from pathlib import Path
 import wave
+import numpy as np
 
 # base directories
 BASE_DIR = Path(__file__).resolve().parent
@@ -21,3 +22,9 @@ for audio_path in wav_files:
         print("Sample rate:", wf.getframerate())
         print("Sample width:", wf.getsampwidth())
         print("Frames:", wf.getnframes())
+
+        # Read all frames and calculate max/min
+        frames = wf.readframes(wf.getnframes())
+        samples = np.frombuffer(frames, dtype=np.int16)  # Assuming 16-bit PCM
+        print("Max value:", np.max(samples))
+        print("Min value:", np.min(samples))

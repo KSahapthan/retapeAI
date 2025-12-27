@@ -1,8 +1,8 @@
-# streaming.py
+# utils/streaming.py
 import wave
 import time
-from typing import Generator
 import numpy as np
+from typing import Generator
 from scipy.signal import resample_poly
 
 TARGET_SR = 8000
