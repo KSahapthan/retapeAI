@@ -12,11 +12,11 @@ from utils.calculate_goertzel import calculate_goertzel
 
 CHUNK_MS = 20        # Each chunk is 20ms
 TARGET_FREQ = 1000   # 1000Hz beep
-THRESHOLD = 10       # Adjust based on files
-CONSECUTIVE_REQD = 5 # 5 consecutive chunks (~100ms) for beep start
+THRESHOLD = 0.5      # Adjust based on files
+CONSECUTIVE_REQD = 10 # 5 consecutive chunks (~100ms) for beep start
 BUFFER_MS = 200      # Safety buffer after beep end
 
-def detect_beep(audio_stream: Generator[bytes, None, None]):
+def detect_beep(audio_stream: Generator[bytes, None, None],stop_event=None):
     """
     Detects beep start and end in a real-time audio stream.
     Yields a dictionary with:
@@ -26,7 +26,7 @@ def detect_beep(audio_stream: Generator[bytes, None, None]):
             "status": "sent"
         }
     """
-    # track system state (waiting for beep vs in beep)
+    # state variables
     state = "LISTENING"
     # counts consecutive chunks above threshold to confirm beep start (hysteresis)
     beep_counter = 0
@@ -36,6 +36,9 @@ def detect_beep(audio_stream: Generator[bytes, None, None]):
     current_time_ms = 0
 
     for chunk in audio_stream:
+        if stop_event and stop_event.is_set():
+            return
+        
         samples = np.frombuffer(chunk, dtype=np.int16)
         # normalize to -1.0 to 1.0
         samples = samples / 32768.0  
@@ -58,12 +61,15 @@ def detect_beep(audio_stream: Generator[bytes, None, None]):
                 miss_counter += 1
                 if miss_counter >= 3:  # ~60ms silence to mark end
                     trigger_time = current_time_ms + BUFFER_MS
+                    print(f"Beep end detected at {current_time_ms}ms, trigger at {trigger_time}ms") 
                     yield {
                         "timestamp_ms": trigger_time,
                         "mode": "beep",
                         "status": "sent"
                     }
-                    break
+                    if stop_event: 
+                        stop_event.set()
+                    return
             else:
                 miss_counter = 0
 
